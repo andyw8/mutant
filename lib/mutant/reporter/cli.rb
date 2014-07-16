@@ -4,6 +4,20 @@ module Mutant
     class CLI < self
       include Concord.new(:output)
 
+      # Rate per second progress report fires
+      OUTPUT_RATE = 1.0 / 20
+
+      # Initialize object
+      #
+      # @return [undefined]
+      #
+      # @api private
+      #
+      def initialize(*)
+        super
+        @last = nil
+      end
+
       # Report progress object
       #
       # @param [Object] object
@@ -13,7 +27,10 @@ module Mutant
       # @api private
       #
       def progress(object)
-        Progress.run(output, object)
+        throttle do
+          Progress.run(output, object)
+        end
+
         self
       end
 
@@ -41,6 +58,22 @@ module Mutant
       def report(object)
         Report.run(output, object)
         self
+      end
+
+      private
+
+      # Call block throttled
+      #
+      # @return [undefined]
+      #
+      # @api private
+      #
+      def throttle
+        now = Time.now
+        if @last && now - @last >= OUTPUT_RATE
+          yield
+        end
+        @last = now
       end
 
     end # CLI

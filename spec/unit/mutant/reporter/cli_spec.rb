@@ -21,6 +21,7 @@ describe Mutant::Reporter::CLI do
 
   let(:result) do
     Mutant::Result::Env.new(
+      done:            true,
       env:             env,
       runtime:         1.1,
       subject_results: subject_results
@@ -107,71 +108,33 @@ describe Mutant::Reporter::CLI do
   let(:subjects) { [_subject] }
 
   describe '#progress' do
-    subject { object.progress(reportable) }
+    subject { object.progress(collector) }
 
     let(:config) { Mutant::Config::DEFAULT.update(includes: %w(include-dir), requires: %w(require-name)) }
 
-    context 'with env' do
-      let(:reportable) { env }
-
-      it 'writes report to output' do
-        subject
-        expect(contents).to eql(strip_indent(<<-REPORT))
-          Mutant configuration:
-          Matcher:            #<Mutant::Matcher::Config match_expressions=[] subject_ignores=[] subject_selects=[]>
-          Integration:        null
-          Expect Coverage:    100.00%
-          Includes:           ["include-dir"]
-          Requires:           ["require-name"]
-          Available Subjects: 10
-          Subjects:           1
-          Mutations:          1
-        REPORT
-      end
+    let(:collector) do
+      collector = Mutant::Runner::Collector.new(env)
     end
 
-    context 'with subject' do
-      let(:reportable) { _subject }
+    let(:mutation_result_success) { true }
 
-      it 'writes report to output' do
-        subject
-        expect(contents).to eql(strip_indent(<<-REPORT))
-          subject_id mutations: 1
-          - test_id
-        REPORT
-      end
-    end
-
-    context 'with subject report' do
-      let(:reportable) { subject_results.first }
-      let(:mutation_result_success) { true }
-
-      it 'writes report to output' do
-        subject
-        expect(contents).to eql("\n(01/01) 100% - killtime: 0.50s runtime: 1.00s overhead: 0.50s\n")
-      end
-    end
-
-    context 'with mutation result' do
-      let(:reportable) { subject_results.first.mutation_results.first }
-
-      context 'when mutation results in success' do
-        let(:mutation_result_success) { true }
-
-        it 'writes report to output' do
-          subject
-          expect(contents).to eql('.')
-        end
-      end
-
-      context 'when mutation results in failure' do
-        let(:mutation_result_success) { false }
-
-        it 'writes report to output' do
-          subject
-          expect(contents).to eql('F')
-        end
-      end
+    it 'writes report to output' do
+      subject
+      expect(contents).to eql(strip_indent(<<-REPORT))
+        Mutant configuration:
+        Matcher:            #<Mutant::Matcher::Config match_expressions=[] subject_ignores=[] subject_selects=[]>
+        Integration:        null
+        Expect Coverage:    100.00%
+        Includes:           ["include-dir"]
+        Requires:           ["require-name"]
+        Available Subjects: 10
+        Subjects:           1
+        Mutations:          1
+        subject_id mutations: 1
+        - test_id
+        .
+        (01/01) 100% - killtime: 0.50s runtime: 1.00s overhead: 0.50s
+      REPORT
     end
   end
 
@@ -320,7 +283,6 @@ describe Mutant::Reporter::CLI do
     end
 
     context 'without subjects' do
-
       let(:subjects)        { [] }
       let(:subject_results) { [] }
 

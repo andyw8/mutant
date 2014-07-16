@@ -1,7 +1,7 @@
 module Mutant
   # Abstract base class for reporters
   class Reporter
-    include Adamantium::Flat, AbstractType
+    include AbstractType
 
     # Write warning message
     #

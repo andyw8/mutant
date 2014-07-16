@@ -1,10 +1,11 @@
 module Mutant
   class Reporter
     class CLI
-
       # CLI runner status printer base class
       class Printer
         include AbstractType, Delegator, Adamantium::Flat, Concord.new(:output, :object)
+
+        CLEAR_SCREEN = "\e[H\e[2J".freeze
 
         NL = "\n".freeze
 
@@ -107,16 +108,6 @@ module Mutant
           object.success?
         end
 
-        # Test if output can be colored
-        #
-        # @return [Boolean]
-        #
-        # @api private
-        #
-        def color?
-          tty?
-        end
-
         # Colorize message
         #
         # @param [Color] color
@@ -133,6 +124,16 @@ module Mutant
           color.format(message)
         end
 
+        # Clear screen
+        #
+        # @return [undefined]
+        #
+        # @api private
+        #
+        def clear
+          puts(CLEAR_SCREEN) if tty?
+        end
+
         # Test for output to tty
         #
         # @return [Boolean]
@@ -143,6 +144,14 @@ module Mutant
           output.respond_to?(:tty?) && output.tty?
         end
         memoize :tty?
+
+        # Test if output can be colored
+        #
+        # @return [Boolean]
+        #
+        # @api private
+        #
+        alias_method :color?, :tty?
 
       end # Printer
     end # CLI

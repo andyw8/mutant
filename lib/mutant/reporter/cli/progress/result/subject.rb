@@ -10,6 +10,8 @@ module Mutant
 
             handle(Mutant::Result::Subject)
 
+            delegate :coverage, :runtime, :amount_mutations_killed, :amount_mutations, :killtime, :overhead
+
             # Run printer
             #
             # @return [self]
@@ -17,12 +19,12 @@ module Mutant
             # @api private
             #
             def run
+              visit(object.subject)
+              visit_collection(object.mutation_results)
               print_progress_bar_finish
               print_stats
               self
             end
-
-            delegate :coverage, :runtime, :amount_mutations_killed, :amount_mutations, :killtime, :overhead
 
           private
 

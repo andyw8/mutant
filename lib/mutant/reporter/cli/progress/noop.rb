@@ -7,7 +7,6 @@ module Mutant
 
           handle(Mutant::Test)
           handle(Mutant::Mutation)
-          handle(Mutant::Result::Env)
           handle(Mutant::Result::Test)
 
           # Noop progress report
